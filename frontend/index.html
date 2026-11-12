@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAQR Shapes Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="calculator">
+        <h1>Shapes Calculator</h1>
+        <p>Calculate the area of a shape</p>
+
+        <form id="calculatorForm">
+            <label for="type">Choose a shape</label>
+            <select id="type">
+                <option value="circle">Circle</option>
+                <option value="rectangle">Rectangle</option>
+            </select>
+
+            <div id="circleFields">
+                <label for="radius">Radius</label>
+                <input type="number" id="radius" min="0.01" step="any" value="5">
+            </div>
+
+            <div id="rectangleFields" hidden>
+                <label for="width">Width</label>
+                <input type="number" id="width" min="0.01" step="any" value="4">
+
+                <label for="height">Height</label>
+                <input type="number" id="height" min="0.01" step="any" value="6">
+            </div>
+
+            <button type="submit">Calculate Area</button>
+        </form>
+
+        <div id="result">Your result will appear here.</div>
+    </main>
+
+    <script>
+        const type = document.getElementById("type");
+        const circleFields = document.getElementById("circleFields");
+        const rectangleFields = document.getElementById("rectangleFields");
+        const form = document.getElementById("calculatorForm");
+        const result = document.getElementById("result");
+
+        type.addEventListener("change", () => {
+            const isCircle = type.value === "circle";
+
+            circleFields.hidden = !isCircle;
+            rectangleFields.hidden = isCircle;
+            result.textContent = "Your result will appear here.";
+        });
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const data = { type: type.value };
+
+            if (type.value === "circle") {
+                data.radius = Number(document.getElementById("radius").value);
+            } else {
+                data.width = Number(document.getElementById("width").value);
+                data.height = Number(document.getElementById("height").value);
+            }
+
+            if (Object.values(data).some(value =>
+                typeof value === "number" && (!Number.isFinite(value) || value <= 0)
+            )) {
+                result.textContent = "Please enter valid positive numbers.";
+                return;
+            }
+
+            result.textContent = "Calculating...";
+
+            try {
+                const response = await fetch("/api/shapes/calculate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                const output = await response.json();
+
+                if (!response.ok || !output.success) {
+                    throw new Error(output.message || "Calculation failed.");
+                }
+
+                result.textContent = `${output.shape} Area: ${output.area}`;
+            } catch (error) {
+                result.textContent = error.message;
+            }
+        });
+    </script>
+
+</body>
+</html>
