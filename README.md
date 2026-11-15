@@ -19,8 +19,6 @@ The application calculates the areas of different geometric shapes. Each technol
 * **Java 25**
 * **Node.js**
 * **Express.js**
-* **HTML5**
-* **CSS3**
 * **JavaScript**
 * **PowerShell**
 * **JDK (javac and java)**
